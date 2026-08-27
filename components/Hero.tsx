@@ -144,7 +144,7 @@ export const Hero: React.FC = () => {
               
               <div className="relative aspect-[4/3] rounded-xl overflow-hidden bg-industrial-surface">
                 <img
-                  src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=1200&auto=format&fit=crop"
+                  src="\images\hero\hero-kitchen.webp"
                   alt="Кухня от фабрики Удобна"
                   className="w-full h-full object-cover gpu-layer"
                 />
