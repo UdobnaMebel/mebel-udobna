@@ -1,0 +1,72 @@
+/* app/globals.css */
+@import "tailwindcss";
+
+@theme {
+  --color-industrial-bg: #0B0D10;
+  --color-industrial-surface: #14171D;
+  --color-industrial-border: #232833;
+  --color-industrial-accent: #FF4D00;
+  --color-industrial-accentHover: #E04400;
+  --color-industrial-cyan: #00E5FF;
+  --color-industrial-lightBg: #F7F8FA;
+  --color-industrial-lightCard: #FFFFFF;
+  --color-industrial-muted: #8A94A6;
+  --color-industrial-darkText: #0F141C;
+
+  --shadow-industrial: 0 10px 30px -10px rgba(255, 77, 0, 0.35);
+  --shadow-glass: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+}
+
+::selection {
+  background-color: #FF4D00;
+  color: #FFFFFF;
+}
+
+body {
+  background-color: #0B0D10;
+  color: #FFFFFF;
+  overflow-x: hidden;
+}
+
+/* Идеальный перенос заголовков без висячих слов */
+h1, h2, h3, h4 {
+  text-wrap: balance;
+}
+
+/* Эффект матового стекла */
+.glass-panel {
+  background: rgba(20, 23, 29, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Инженерная сетка на фоне */
+.bg-grid-pattern {
+  background-size: 40px 40px;
+  background-image: 
+    linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+}
+
+/* Аппаратное ускорение для плавных 60 FPS анимаций */
+.gpu-layer {
+  transform: translateZ(0);
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+}
+
+/* Кастомный тонкий скроллбар */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #0B0D10;
+}
+::-webkit-scrollbar-thumb {
+  background: #232833;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #FF4D00;
+}
