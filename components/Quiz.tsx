@@ -14,7 +14,8 @@ import {
   Loader2,
   CheckCircle2,
   FileText,
-  ChevronRight
+  ChevronRight,
+  AlertCircle
 } from "lucide-react";
 
 interface QuizState {
@@ -26,8 +27,44 @@ interface QuizState {
 }
 
 // ══════════════════════════════════════════════════════════════
-// 1. БАЗОВЫЕ ЦЕНЫ И СПИСКИ (СИНХРОНИЗИРОВАНЫ С БОТОМ)
+// УМНАЯ МАСКА И ВАЛИДАЦИЯ ТЕЛЕФОНА
 // ══════════════════════════════════════════════════════════════
+export const formatPhoneNumber = (value: string): string => {
+  if (!value) return "";
+  let digits = value.replace(/\D/g, "");
+
+  if (digits.startsWith("7") || digits.startsWith("8")) {
+    digits = digits.substring(1);
+  }
+  digits = digits.substring(0, 10);
+
+  if (digits.length === 0) return "";
+
+  let formatted = "+7 (";
+  if (digits.length > 0) {
+    formatted += digits.substring(0, Math.min(3, digits.length));
+  }
+  if (digits.length >= 4) {
+    formatted += ") " + digits.substring(3, Math.min(6, digits.length));
+  }
+  if (digits.length >= 7) {
+    formatted += "-" + digits.substring(6, Math.min(8, digits.length));
+  }
+  if (digits.length >= 9) {
+    formatted += "-" + digits.substring(8, 10);
+  }
+
+  return formatted;
+};
+
+export const isValidRussianPhone = (phone: string): boolean => {
+  const digits = phone.replace(/\D/g, "");
+  if (digits.length !== 11) return false;
+  if (/^7(\d)\1{9}$/.test(digits)) return false; // Защита от одинаковых цифр 70000000000 / 71111111111
+  if (/^7[0-2]/.test(digits)) return false; // Коды РФ не начинаются с 0, 1, 2
+  return true;
+};
+
 const typesList = [
   "Кухня",
   "Кухня + Мебель во всю квартиру",
@@ -92,6 +129,8 @@ export const Quiz: React.FC = () => {
   });
 
   const [agreement, setAgreement] = useState(true);
+  const [phoneError, setPhoneError] = useState<string | null>(null);
+  const [agreementError, setAgreementError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
 
@@ -116,9 +155,8 @@ export const Quiz: React.FC = () => {
     return { minPrice, maxPrice, avgPrice };
   };
 
-  const { minPrice, maxPrice } = calculatePriceRange();
+  const { minPrice, maxPrice, avgPrice } = calculatePriceRange();
 
-  // 🎯 Генерация ссылки со всеми выборами пользователя
   const getBotStartUrl = () => {
     const typeIdx = Math.max(0, typesList.indexOf(quizData.type as (typeof typesList)[number]));
     const currentShapes = shapeOptionsByType[quizData.type] || shapeOptionsByType["Кухня"];
@@ -126,14 +164,28 @@ export const Quiz: React.FC = () => {
     const matIdx = Math.max(0, materialsList.indexOf(quizData.material as (typeof materialsList)[number]));
     const instIdx = Math.max(0, installmentsList.indexOf(quizData.installment as (typeof installmentsList)[number]));
 
-    // Компактный payload: qz_0_1_1_0_175000_215000
     const payload = `qz_${typeIdx}_${shapeIdx}_${matIdx}_${instIdx}_${minPrice}_${maxPrice}`;
     return `https://t.me/${cleanBotName}?start=${payload}`;
   };
 
   const handlePhoneSubmit = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
-    if (!quizData.phone || isSubmitting) return;
+    setPhoneError(null);
+    setAgreementError(null);
+
+    // Строгая проверка согласия
+    if (!agreement) {
+      setAgreementError("Пожалуйста, подтвердите согласие на обработку персональных данных");
+      return;
+    }
+
+    // Строгая проверка валидности номера
+    if (!isValidRussianPhone(quizData.phone)) {
+      setPhoneError("Введите корректный номер телефона (10 цифр)");
+      return;
+    }
+
+    if (isSubmitting) return;
 
     setIsSubmitting(true);
     try {
@@ -380,7 +432,7 @@ export const Quiz: React.FC = () => {
               </motion.div>
             )}
 
-            {/* ШАГ 5: ИТОГОВАЯ ВИЛКА ЦЕН */}
+            {/* ШАГ 5: ИТОГОВАЯ ВИЛКА ЦЕН И ФОРМА */}
             {step === 5 && (
               <motion.div
                 key="step5"
@@ -449,43 +501,73 @@ export const Quiz: React.FC = () => {
                       <div className="flex-1 h-px bg-industrial-border" />
                     </div>
 
-                    <form onSubmit={handlePhoneSubmit} className="flex flex-col sm:flex-row gap-3">
-                      <input
-                        type="tel"
-                        required
-                        placeholder="+7 (9XX) XXX-XX-XX"
-                        value={quizData.phone}
-                        onChange={(e) => setQuizData({ ...quizData, phone: e.target.value })}
-                        className="flex-1 px-4 py-3.5 rounded-xl bg-industrial-bg border border-industrial-border text-white text-sm sm:text-base focus:outline-none focus:border-industrial-accent"
-                      />
-                      <button
-                        type="submit"
-                        disabled={isSubmitting}
-                        className="px-6 py-3.5 rounded-xl bg-industrial-accent hover:bg-industrial-accentHover text-white font-bold text-xs sm:text-sm uppercase tracking-wider transition-all whitespace-nowrap cursor-pointer flex items-center justify-center gap-2 shadow-industrial active:scale-95 disabled:opacity-50"
-                      >
-                        {isSubmitting ? (
-                          <Loader2 className="w-4 h-4 animate-spin" />
-                        ) : (
-                          <>
-                            <span>Отправить смету</span>
-                            <ChevronRight className="w-4 h-4" />
-                          </>
-                        )}
-                      </button>
+                    {/* Форма ввода телефона с умной маской */}
+                    <form onSubmit={handlePhoneSubmit} className="space-y-2">
+                      <div className="flex flex-col sm:flex-row gap-3">
+                        <div className="flex-1">
+                          <input
+                            type="tel"
+                            placeholder="+7 (9XX) XXX-XX-XX"
+                            value={quizData.phone}
+                            onChange={(e) => {
+                              setQuizData({ ...quizData, phone: formatPhoneNumber(e.target.value) });
+                              if (phoneError) setPhoneError(null);
+                            }}
+                            className={`w-full px-4 py-3.5 rounded-xl bg-industrial-bg border text-white text-sm sm:text-base focus:outline-none transition-colors ${
+                              phoneError ? "border-red-500 ring-2 ring-red-500/20" : "border-industrial-border focus:border-industrial-accent"
+                            }`}
+                          />
+                        </div>
+
+                        <button
+                          type="submit"
+                          disabled={isSubmitting}
+                          className="px-6 py-3.5 rounded-xl bg-industrial-accent hover:bg-industrial-accentHover text-white font-bold text-xs sm:text-sm uppercase tracking-wider transition-all whitespace-nowrap cursor-pointer flex items-center justify-center gap-2 shadow-industrial active:scale-95 disabled:opacity-50"
+                        >
+                          {isSubmitting ? (
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                          ) : (
+                            <>
+                              <span>Отправить смету</span>
+                              <ChevronRight className="w-4 h-4" />
+                            </>
+                          )}
+                        </button>
+                      </div>
+
+                      {phoneError && (
+                        <p className="text-xs text-red-400 font-medium flex items-center gap-1.5 pt-0.5">
+                          <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                          {phoneError}
+                        </p>
+                      )}
                     </form>
 
-                    <label className="flex items-start gap-2.5 mt-2.5 cursor-pointer text-left">
-                      <input
-                        type="checkbox"
-                        checked={agreement}
-                        onChange={(e) => setAgreement(e.target.checked)}
-                        required
-                        className="mt-0.5 w-4 h-4 rounded border-industrial-border bg-industrial-bg text-industrial-accent focus:ring-0 shrink-0"
-                      />
-                      <span className="text-xs text-industrial-muted leading-relaxed">
-                        Даю согласие на обработку персональных данных по 152-ФЗ. Номер используется только для отправки расчета и брони подарка.
-                      </span>
-                    </label>
+                    {/* Чекбокс согласия */}
+                    <div>
+                      <label className="flex items-start gap-2.5 mt-2 cursor-pointer text-left">
+                        <input
+                          type="checkbox"
+                          checked={agreement}
+                          onChange={(e) => {
+                            setAgreement(e.target.checked);
+                            if (agreementError) setAgreementError(null);
+                          }}
+                          className="mt-0.5 w-4 h-4 rounded border-industrial-border bg-industrial-bg text-industrial-accent focus:ring-0 shrink-0"
+                        />
+                        <span className="text-xs text-industrial-muted leading-relaxed">
+                          Даю согласие на обработку персональных данных по 152-ФЗ. Номер используется только для отправки расчета и брони подарка.
+                        </span>
+                      </label>
+
+                      {agreementError && (
+                        <p className="text-xs text-red-400 font-medium flex items-center gap-1.5 mt-1.5">
+                          <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                          {agreementError}
+                        </p>
+                      )}
+                    </div>
+
                   </div>
                 ) : (
                   <div className="py-8 text-center space-y-3 bg-emerald-950/20 border border-emerald-500/30 rounded-2xl p-6">

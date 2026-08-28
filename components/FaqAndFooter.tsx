@@ -15,9 +15,11 @@ import {
   Phone, 
   MessageSquare, 
   Loader2, 
-  ChevronRight 
+  ChevronRight,
+  AlertCircle
 } from "lucide-react";
 import { companyConfig } from "../data/company";
+import { formatPhoneNumber, isValidRussianPhone } from "./Quiz";
 
 interface FaqItem {
   q: string;
@@ -47,16 +49,30 @@ export const FaqAndFooter: React.FC = () => {
   const [openFaq, setOpenFaq] = useState<number | null>(0);
   const [logoError, setLogoError] = useState(false);
   
-  // Состояние финальной формы
   const [phone, setPhone] = useState("");
   const [name, setName] = useState("");
   const [agreement, setAgreement] = useState(true);
+  const [phoneError, setPhoneError] = useState<string | null>(null);
+  const [agreementError, setAgreementError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
 
   const handleBottomFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!phone || isSubmitting) return;
+    setPhoneError(null);
+    setAgreementError(null);
+
+    if (!agreement) {
+      setAgreementError("Пожалуйста, подтвердите согласие на обработку персональных данных");
+      return;
+    }
+
+    if (!isValidRussianPhone(phone)) {
+      setPhoneError("Введите корректный номер телефона (10 цифр)");
+      return;
+    }
+
+    if (isSubmitting) return;
 
     setIsSubmitting(true);
     try {
@@ -158,7 +174,6 @@ export const FaqAndFooter: React.FC = () => {
           
           <div className="rounded-3xl border-2 border-industrial-accent/40 bg-gradient-to-b from-industrial-accent/15 via-industrial-surface to-industrial-bg p-6 sm:p-12 shadow-2xl relative overflow-hidden">
             
-            {/* Фоновое свечение */}
             <div className="absolute top-0 right-0 w-80 h-80 bg-industrial-accent/20 rounded-full blur-3xl pointer-events-none" />
 
             <div className="max-w-3xl mx-auto text-center relative z-10">
@@ -172,7 +187,7 @@ export const FaqAndFooter: React.FC = () => {
               </h2>
 
               <p className="text-xs sm:text-base text-industrial-muted max-w-xl mx-auto mb-8 leading-relaxed">
-                Оставьте номер сегодня — зафиксируйте за собой <strong className="text-white">комплект скрытой LED-подсветки</strong> в подарок при заказе.
+                Оставьте номер сегодня — зафиксируйте за собой <strong className="text-white">каменную мойку GranFest</strong> или <strong className="text-white">комплект скрытой LED-подсветки</strong> в подарок при заказе.
               </p>
 
               {!isSubmitted ? (
@@ -192,11 +207,15 @@ export const FaqAndFooter: React.FC = () => {
                     <div className="sm:col-span-4">
                       <input
                         type="tel"
-                        required
-                        placeholder="+7 (9XX) XXX-XX-XX *"
+                        placeholder="+7 (9XX) XXX-XX-XX"
                         value={phone}
-                        onChange={(e) => setPhone(e.target.value)}
-                        className="w-full px-4 py-3.5 rounded-xl bg-industrial-bg/90 border border-industrial-border text-white text-sm focus:outline-none focus:border-industrial-accent"
+                        onChange={(e) => {
+                          setPhone(formatPhoneNumber(e.target.value));
+                          if (phoneError) setPhoneError(null);
+                        }}
+                        className={`w-full px-4 py-3.5 rounded-xl bg-industrial-bg/90 border text-white text-sm focus:outline-none transition-colors ${
+                          phoneError ? "border-red-500 ring-2 ring-red-500/20" : "border-industrial-border focus:border-industrial-accent"
+                        }`}
                       />
                     </div>
 
@@ -219,18 +238,37 @@ export const FaqAndFooter: React.FC = () => {
 
                   </div>
 
-                  <label className="flex items-start justify-center gap-2.5 cursor-pointer text-left pt-2 max-w-xl mx-auto">
-                    <input
-                      type="checkbox"
-                      checked={agreement}
-                      onChange={(e) => setAgreement(e.target.checked)}
-                      required
-                      className="mt-0.5 w-4 h-4 rounded border-industrial-border bg-industrial-bg text-industrial-accent focus:ring-0"
-                    />
-                    <span className="text-[11px] sm:text-xs text-industrial-muted leading-tight">
-                      Согласен на обработку данных по 152-ФЗ. Номер используется исключительно для отправки расчета и брони подарка.
-                    </span>
-                  </label>
+                  {phoneError && (
+                    <p className="text-xs text-red-400 font-medium flex items-center justify-center gap-1.5 pt-0.5">
+                      <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                      {phoneError}
+                    </p>
+                  )}
+
+                  {/* Чекбокс согласия */}
+                  <div>
+                    <label className="flex items-start justify-center gap-2.5 cursor-pointer text-left pt-1 max-w-xl mx-auto">
+                      <input
+                        type="checkbox"
+                        checked={agreement}
+                        onChange={(e) => {
+                          setAgreement(e.target.checked);
+                          if (agreementError) setAgreementError(null);
+                        }}
+                        className="mt-0.5 w-4 h-4 rounded border-industrial-border bg-industrial-bg text-industrial-accent focus:ring-0 shrink-0"
+                      />
+                      <span className="text-[11px] sm:text-xs text-industrial-muted leading-tight">
+                        Согласен на обработку данных по 152-ФЗ. Номер используется исключительно для отправки расчета и брони подарка.
+                      </span>
+                    </label>
+
+                    {agreementError && (
+                      <p className="text-xs text-red-400 font-medium flex items-center justify-center gap-1.5 mt-2">
+                        <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                        {agreementError}
+                      </p>
+                    )}
+                  </div>
                 </form>
               ) : (
                 <motion.div
@@ -246,7 +284,7 @@ export const FaqAndFooter: React.FC = () => {
                 </motion.div>
               )}
 
-              {/* Прямые ссылки на связь с технологом */}
+              {/* Прямые ссылки */}
               <div className="mt-8 pt-6 border-t border-industrial-border/60 flex flex-wrap items-center justify-center gap-4 text-xs text-industrial-muted">
                 <span>Или напишите нам напрямую:</span>
                 <a
@@ -255,7 +293,7 @@ export const FaqAndFooter: React.FC = () => {
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-1.5 text-sky-400 hover:text-sky-300 font-bold font-mono"
                 >
-                  <Send className="w-3.5 h-3.5" /> Telegram
+                  <Send className="w-3.5 h-3.5" /> Telegram технолога
                 </a>
                 <span>•</span>
                 <a
@@ -264,7 +302,7 @@ export const FaqAndFooter: React.FC = () => {
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-1.5 text-emerald-400 hover:text-emerald-300 font-bold font-mono"
                 >
-                  <MessageSquare className="w-3.5 h-3.5" /> WhatsApp
+                  <MessageSquare className="w-3.5 h-3.5" /> WhatsApp технолога
                 </a>
               </div>
 
@@ -283,7 +321,6 @@ export const FaqAndFooter: React.FC = () => {
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-10">
             
-            {/* Колонка 1 */}
             <div>
               <div className="flex items-center gap-2.5 mb-3">
                 {!logoError ? (
@@ -305,14 +342,13 @@ export const FaqAndFooter: React.FC = () => {
                 </span>
               </div>
               <p className="text-industrial-muted leading-relaxed mb-3">
-                Фабрика корпусной мебели прямого цикла. Производство кухонь, шкафов и мебели под ключ в Ростове-на-Дону с 2011 года.
+                Фабрика корпусной мебели. Производство кухонь, шкафов и мебели под ключ в Ростове-на-Дону и области с 2011 года.
               </p>
               <span className="text-[11px] font-mono text-emerald-400 block font-semibold">
-                ● Собственный цех • Прямые поставки фурнитуры
+                ● Собственный цех
               </span>
             </div>
 
-            {/* Колонка 2 */}
             <div>
               <h5 className="font-bold text-white uppercase font-mono tracking-wider mb-3">
                 Юридические данные
@@ -327,7 +363,6 @@ export const FaqAndFooter: React.FC = () => {
               </div>
             </div>
 
-            {/* Колонка 3 */}
             <div>
               <h5 className="font-bold text-white uppercase font-mono tracking-wider mb-3">
                 Производство и контакты
@@ -350,7 +385,6 @@ export const FaqAndFooter: React.FC = () => {
               </div>
             </div>
 
-            {/* Колонка 4 */}
             <div>
               <h5 className="font-bold text-white uppercase font-mono tracking-wider mb-3">
                 Документы и безопасность

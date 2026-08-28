@@ -57,7 +57,7 @@ export async function POST(req: Request) {
         const confirmationText = 
           `🎉 <b>Заявка на бесплатный выезд зафиксирована!</b>\n\n` +
           `${userFirstName}, дежурный технолог фабрики «Удобна» свяжется с вами в Telegram в течение 10 минут для согласования адреса и удобного времени.\n\n` +
-          `🧰 Мастер привезет чемодан из 200+ образцов и сделает точный 3D-проект на месте.`;
+          `🧰 Мастер привезет чемодан из 200+ образцов и сделает точные замеры.`;
 
         await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
           method: "POST",

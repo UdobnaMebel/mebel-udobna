@@ -17,8 +17,10 @@ import {
   Ticket, 
   X,
   Building2,
-  Loader2
+  Loader2,
+  AlertCircle
 } from "lucide-react";
+import { formatPhoneNumber, isValidRussianPhone } from "./Quiz";
 
 interface WorkshopPhoto {
   title: string;
@@ -31,19 +33,19 @@ const workshopPhotos: WorkshopPhoto[] = [
   {
     title: "ЧПУ-раскроечный центр",
     desc: "Идеальный рез без сколов и трещин с точностью до 0.1 мм",
-    img: "/images/workshop/shop-1.webp",
+    img: "https://images.unsplash.com/photo-1581092160607-ee22621dd758?q=80&w=1000&auto=format&fit=crop",
     badge: "ЧПУ лазер",
   },
   {
     title: "Линия PUR-кромления",
     desc: "Полиуретановый влагостойкий шов, стойкий к пару от чайника 140°C",
-    img: "/images/workshop/shop-2.webp",
+    img: "https://images.unsplash.com/photo-1581092335397-9583fe92d232?q=80&w=1000&auto=format&fit=crop",
     badge: "100% влагозащита",
   },
   {
     title: "Склад сертифицированных плит",
     desc: "Оригинальные плиты Egger (Австрия) и Lamarty класса безопасности E0.5",
-    img: "/images/workshop/shop-3.webp",
+    img: "https://images.unsplash.com/photo-1504917599217-d4dc5ebe6122?q=80&w=1000&auto=format&fit=crop",
     badge: "Эко-класс E0.5",
   },
 ];
@@ -53,20 +55,34 @@ export const WorkshopAndShowroom: React.FC = () => {
   const [isPassModalOpen, setIsPassModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   
-  // Состояние формы замера
   const [formData, setFormData] = useState({
     name: "",
     phone: "",
     address: "",
   });
   const [agreement, setAgreement] = useState(true);
+  const [phoneError, setPhoneError] = useState<string | null>(null);
+  const [agreementError, setAgreementError] = useState<string | null>(null);
   const [isSubmitted, setIsSubmitted] = useState(false);
 
   const tgManagerUrl = process.env.NEXT_PUBLIC_TG_MANAGER || "https://t.me/your_manager_username";
 
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.phone || isSubmitting) return;
+    setPhoneError(null);
+    setAgreementError(null);
+
+    if (!agreement) {
+      setAgreementError("Пожалуйста, подтвердите согласие на обработку персональных данных");
+      return;
+    }
+
+    if (!isValidRussianPhone(formData.phone)) {
+      setPhoneError("Введите корректный номер телефона (10 цифр)");
+      return;
+    }
+
+    if (isSubmitting) return;
 
     setIsSubmitting(true);
     try {
@@ -127,7 +143,7 @@ export const WorkshopAndShowroom: React.FC = () => {
                   Кто за это платит?
                 </h4>
                 <p className="text-xs sm:text-sm text-industrial-muted leading-relaxed">
-                  Покупатель — переплачивая от <strong className="text-white font-semibold">30% до 40%</strong> за каждый погонный метр. Мы инвестировали эти средства в <strong className="text-emerald-400">улучшение качества продукции</strong> и технологии производства, а образцы привозим прямо к вам на объект.
+                  Покупатель — переплачивая от <strong className="text-white font-semibold">30% до 40%</strong> за каждый погонный метр. Мы инвестировали эти средства в <strong className="text-emerald-400">немецкие станки с ЧПУ</strong> и технологию PUR-кромления, а образцы привозим прямо к вам на объект.
                 </p>
               </div>
 
@@ -154,7 +170,7 @@ export const WorkshopAndShowroom: React.FC = () => {
                 className="inline-flex items-center justify-center gap-2.5 px-6 sm:px-8 py-4 rounded-xl bg-industrial-surface border-2 border-industrial-accent/40 hover:border-industrial-accent text-white font-bold text-xs sm:text-sm uppercase tracking-wider hover:bg-industrial-accent/10 transition-all shadow-xl active:scale-95 cursor-pointer w-full sm:w-auto"
               >
                 <Ticket className="w-4 h-4 text-industrial-accent" />
-                <span>Запланировать визит в цех</span>
+                <span>Запросить гостевой пропуск в цех</span>
               </button>
             </div>
 
@@ -222,7 +238,6 @@ export const WorkshopAndShowroom: React.FC = () => {
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           
-          {/* Заголовок */}
           <div className="text-center max-w-4xl mx-auto mb-12 sm:mb-16">
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-industrial-surface border border-industrial-border text-xs sm:text-sm text-industrial-accent font-mono uppercase tracking-wider mb-3.5 font-semibold">
               <Ruler className="w-4 h-4" /> Чемодан из 200+ образцов материалов
@@ -235,7 +250,6 @@ export const WorkshopAndShowroom: React.FC = () => {
             </p>
           </div>
 
-          {/* 4 шага замера */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6 mb-12">
             {[
               {
@@ -252,8 +266,8 @@ export const WorkshopAndShowroom: React.FC = () => {
               },
               {
                 step: "03",
-                title: "3D-проект и смета",
-                desc: "Инженер составляет точную планировку и рассчитывает смету.",
+                title: "3D-проект и смета за 40 мин",
+                desc: "Инженер составляет точную планировку на ноутбуке и рассчитывает смету в 3 комплектациях.",
                 icon: Sparkles,
               },
               {
@@ -291,7 +305,7 @@ export const WorkshopAndShowroom: React.FC = () => {
             })}
           </div>
 
-          {/* 🎯 КОНВЕРСИОННАЯ ФОРМА С ПЕРСОНАЛЬНЫМ ЯКОРЕМ */}
+          {/* КОНВЕРСИОННАЯ ФОРМА С ВАЛИДАЦИЕЙ */}
           <div 
             id="booking-form"
             className="max-w-4xl mx-auto glass-panel p-6 sm:p-10 rounded-2xl border border-white/15 shadow-2xl relative overflow-hidden scroll-mt-24 sm:scroll-mt-28"
@@ -299,7 +313,7 @@ export const WorkshopAndShowroom: React.FC = () => {
             <div className="absolute -top-24 -right-24 w-64 h-64 bg-industrial-accent/15 rounded-full blur-2xl pointer-events-none" />
 
             {!isSubmitted ? (
-              <form onSubmit={handleFormSubmit} className="space-y-6 relative z-10 text-left">
+              <form onSubmit={handleFormSubmit} className="space-y-5 relative z-10 text-left">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-industrial-border pb-4">
                   <div>
                     <h3 className="text-lg sm:text-2xl font-black text-white">
@@ -333,12 +347,22 @@ export const WorkshopAndShowroom: React.FC = () => {
                     </label>
                     <input
                       type="tel"
-                      required
                       placeholder="+7 (9XX) XXX-XX-XX"
                       value={formData.phone}
-                      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                      className="w-full px-4 py-3.5 rounded-xl bg-industrial-bg border border-industrial-border text-white text-sm focus:outline-none focus:border-industrial-accent"
+                      onChange={(e) => {
+                        setFormData({ ...formData, phone: formatPhoneNumber(e.target.value) });
+                        if (phoneError) setPhoneError(null);
+                      }}
+                      className={`w-full px-4 py-3.5 rounded-xl bg-industrial-bg border text-white text-sm focus:outline-none transition-colors ${
+                        phoneError ? "border-red-500 ring-2 ring-red-500/20" : "border-industrial-border focus:border-industrial-accent"
+                      }`}
                     />
+                    {phoneError && (
+                      <p className="text-[11px] text-red-400 font-medium flex items-center gap-1 mt-1">
+                        <AlertCircle className="w-3 h-3 shrink-0" />
+                        {phoneError}
+                      </p>
+                    )}
                   </div>
 
                   <div>
@@ -353,8 +377,8 @@ export const WorkshopAndShowroom: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Кнопка отправки */}
-                <div className="flex flex-col sm:flex-row items-center gap-4 pt-2">
+                {/* Кнопки */}
+                <div className="flex flex-col sm:flex-row items-center gap-4 pt-1">
                   <button
                     type="submit"
                     disabled={isSubmitting}
@@ -381,22 +405,32 @@ export const WorkshopAndShowroom: React.FC = () => {
                   </a>
                 </div>
 
-                {/* Чекбокс согласия 152-ФЗ */}
-                <label className="flex items-start gap-2.5 cursor-pointer text-left pt-2">
-                  <input
-                    type="checkbox"
-                    checked={agreement}
-                    onChange={(e) => setAgreement(e.target.checked)}
-                    required
-                    className="mt-0.5 w-4 h-4 rounded border-industrial-border bg-industrial-bg text-industrial-accent focus:ring-0"
-                  />
-                  <span className="text-xs text-industrial-muted leading-relaxed">
-                    Согласен на обработку персональных данных в соответствии с 152-ФЗ. Номер используется только для согласования времени выезда мастера.
-                  </span>
-                </label>
+                {/* Чекбокс согласия */}
+                <div>
+                  <label className="flex items-start gap-2.5 cursor-pointer text-left pt-1">
+                    <input
+                      type="checkbox"
+                      checked={agreement}
+                      onChange={(e) => {
+                        setAgreement(e.target.checked);
+                        if (agreementError) setAgreementError(null);
+                      }}
+                      className="mt-0.5 w-4 h-4 rounded border-industrial-border bg-industrial-bg text-industrial-accent focus:ring-0 shrink-0"
+                    />
+                    <span className="text-xs text-industrial-muted leading-relaxed">
+                      Согласен на обработку персональных данных в соответствии с 152-ФЗ. Номер используется только для согласования времени выезда мастера.
+                    </span>
+                  </label>
+
+                  {agreementError && (
+                    <p className="text-xs text-red-400 font-medium flex items-center gap-1.5 mt-1.5">
+                      <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                      {agreementError}
+                    </p>
+                  )}
+                </div>
               </form>
             ) : (
-              /* Экран успешной заявки */
               <motion.div
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
@@ -407,7 +441,7 @@ export const WorkshopAndShowroom: React.FC = () => {
                 </div>
                 <h3 className="text-2xl font-black text-white">Заявка успешно принята!</h3>
                 <p className="text-sm text-industrial-muted max-w-md mx-auto">
-                  Технолог цеха свяжется с вами в течение 10–15 минут для подтверждения адреса и точного времени приезда с чемоданом образцов.
+                  Технолог цеха свяжется с вами в течение 10–15 минут для подтверждения адреса и точного времени приезда с образцами.
                 </p>
                 <button
                   type="button"
@@ -459,7 +493,7 @@ export const WorkshopAndShowroom: React.FC = () => {
                 Экскурсия на мебельную фабрику «Удобна»
               </h3>
               <p className="text-xs sm:text-sm text-industrial-muted mb-5 leading-relaxed">
-                Покажем образцы ЛДСП, фурнитуры и столешниц. Составим подробную смету.
+                Покажем образцы ЛДСП, фурнитуры и столешниц. Рассчитаем точную смету.
               </p>
 
               <div className="bg-industrial-surface p-4 rounded-xl border border-industrial-border text-xs text-white/90 space-y-2 mb-6">
