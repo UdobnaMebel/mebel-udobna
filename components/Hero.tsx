@@ -21,11 +21,14 @@ interface Hotspot {
   description: string;
 }
 
+// ══════════════════════════════════════════════════════════════
+// КООРДИНАТЫ И ТЕКСТЫ ТОЧЕК НА КАРТИНКЕ (X и Y в процентах %)
+// ══════════════════════════════════════════════════════════════
 const hotspots: Hotspot[] = [
   {
     id: 1,
-    x: 28,
-    y: 42,
+    x: 31,
+    y: 38,
     badge: "PUR-кромление 0.1 мм",
     title: "100% влагостойкость и монолитный шов",
     description: "В отличие от гаражного EVA-клея, полиуретановый шов PUR не боится пара от чайника, брызг и не темнеет со временем.",
@@ -33,7 +36,7 @@ const hotspots: Hotspot[] = [
   {
     id: 2,
     x: 68,
-    y: 35,
+    y: 32,
     badge: "Фурнитура Blum / DTC",
     title: "Ресурс 200 000 циклов открываний",
     description: "Плавные доводчики без стука. Двойная фиксация исключает провисание тяжелых фасадов на 15+ лет.",
@@ -41,7 +44,7 @@ const hotspots: Hotspot[] = [
   {
     id: 3,
     x: 48,
-    y: 75,
+    y: 72,
     badge: "Австрийские плиты Egger",
     title: "Экологический класс безопасности E0.5",
     description: "Никаких едких запахов и формальдегидов. Материал полностью безопасен для детей и аллергиков.",
@@ -140,7 +143,7 @@ export const Hero: React.FC = () => {
               
               <div className="relative aspect-[4/3] rounded-xl overflow-hidden bg-industrial-surface">
                 <img
-                  src="\images\hero\hero-kitchen.webp"
+                  src="/images/hero/hero-kitchen.webp"
                   alt="Кухня от фабрики Удобна"
                   loading="eager"
                   decoding="async"
@@ -158,27 +161,35 @@ export const Hero: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Аппаратные точки на GPU */}
+                {/* 🎯 МИНИМАЛИСТИЧНЫЕ ПРЕМИУМ-ТОЧКИ (LEICA / APPLE STYLE) */}
                 {hotspots.map((spot) => {
                   const isActive = activeHotspot?.id === spot.id;
                   return (
                     <button
                       key={spot.id}
+                      type="button"
                       onClick={() => setActiveHotspot(spot)}
                       style={{ top: `${spot.y}%`, left: `${spot.x}%` }}
-                      className="absolute -translate-x-1/2 -translate-y-1/2 z-20 focus:outline-none cursor-pointer p-2 touch-manipulation"
+                      className="absolute -translate-x-1/2 -translate-y-1/2 z-20 focus:outline-none cursor-pointer p-3 touch-manipulation group"
+                      title={spot.title}
                     >
                       <div className="relative flex items-center justify-center">
-                        <span className="absolute w-8 h-8 rounded-full bg-industrial-accent animate-pulse-glow" />
-                        <span
-                          className={`relative flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold transition-transform duration-200 ${
+                        {/* Тонкий пульсирующий сонар */}
+                        <span className="absolute w-7 h-7 sm:w-8 sm:h-8 rounded-full border border-industrial-accent/60 animate-ping opacity-40 pointer-events-none" />
+
+                        {/* Внешнее матовое кольцо */}
+                        <div className={`w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center transition-all duration-300 backdrop-blur-md border ${
+                          isActive 
+                            ? "bg-industrial-accent/25 border-industrial-accent shadow-[0_0_15px_rgba(255,77,0,0.6)] scale-110" 
+                            : "bg-black/50 border-white/40 group-hover:border-white/80 group-hover:scale-105"
+                        }`}>
+                          {/* Внутренний светящийся маркер */}
+                          <span className={`w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full transition-all duration-300 ${
                             isActive 
-                              ? "bg-white text-black ring-4 ring-industrial-accent scale-110" 
-                              : "bg-industrial-accent text-white"
-                          }`}
-                        >
-                          +
-                        </span>
+                              ? "bg-white shadow-[0_0_8px_#ffffff] scale-110" 
+                              : "bg-industrial-accent shadow-[0_0_6px_rgba(255,77,0,0.9)]"
+                          }`} />
+                        </div>
                       </div>
                     </button>
                   );
