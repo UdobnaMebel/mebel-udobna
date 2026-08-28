@@ -480,7 +480,7 @@ export const WorkshopAndShowroom: React.FC = () => {
                 className="w-full py-4 px-6 rounded-xl bg-industrial-accent hover:bg-industrial-accentHover text-white font-bold text-sm uppercase tracking-wider flex items-center justify-center gap-2 shadow-industrial transition-colors"
               >
                 <Send className="w-4 h-4" />
-                <span>Назначит встречу в Telegram</span>
+                <span>Назначить встречу в Telegram</span>
               </a>
             </motion.div>
           </div>

@@ -26,8 +26,15 @@ interface QuizState {
 }
 
 // ══════════════════════════════════════════════════════════════
-// 1. БАЗОВЫЕ ЦЕНЫ ПЛАНИРОВОК (МОЖНО МЕНЯТЬ ПОД ВАШИ РАСЦЕНКИ)
+// 1. БАЗОВЫЕ ЦЕНЫ И СПИСКИ (СИНХРОНИЗИРОВАНЫ С БОТОМ)
 // ══════════════════════════════════════════════════════════════
+const typesList = [
+  "Кухня",
+  "Кухня + Мебель во всю квартиру",
+  "Шкаф-купе / Гардеробная",
+  "Шкаф-кровать трансформер",
+] as const;
+
 const shapeOptionsByType: Record<string, { title: string; desc: string; basePrice: number }[]> = {
   "Кухня": [
     { title: "Прямая (линейная)", desc: "Классическое расположение вдоль одной стены", basePrice: 135000 },
@@ -55,15 +62,24 @@ const shapeOptionsByType: Record<string, { title: string; desc: string; basePric
   ],
 };
 
-// ══════════════════════════════════════════════════════════════
-// 2. КОЭФФИЦИЕНТЫ МАТЕРИАЛОВ (ВЛИЯЮТ НА СТОИМОСТЬ)
-// ══════════════════════════════════════════════════════════════
+const materialsList = [
+  "Практичный стандарт",
+  "Комфорт (МДФ / AGT Supramat)",
+  "Премиум (Шпон / Blum)",
+  "Пока не знаю — хочу сравнить образцы на замере",
+] as const;
+
 const materialMultipliers: Record<string, number> = {
   "Практичный стандарт": 1.0,
   "Комфорт (МДФ / AGT Supramat)": 1.25,
   "Премиум (Шпон / Blum)": 1.55,
   "Пока не знаю — хочу сравнить образцы на замере": 1.15,
 };
+
+const installmentsList = [
+  "Да, интересен платеж от 7 500 ₽/мес",
+  "Нет, оплата наличными / картой",
+] as const;
 
 export const Quiz: React.FC = () => {
   const [step, setStep] = useState(1);
@@ -82,7 +98,7 @@ export const Quiz: React.FC = () => {
   const rawBotName = process.env.NEXT_PUBLIC_TG_BOT_NAME || "mebel_custom_bot";
   const cleanBotName = rawBotName.replace(/^@+/, "").trim();
 
-  // Расчет вилки цен с разбросом ~40 000 ₽
+  // Расчет вилки цен
   const calculatePriceRange = () => {
     const currentShapes = shapeOptionsByType[quizData.type] || shapeOptionsByType["Кухня"];
     const activeShapeObj = currentShapes.find((s) => s.title === quizData.shape) || currentShapes[0];
@@ -100,10 +116,19 @@ export const Quiz: React.FC = () => {
     return { minPrice, maxPrice, avgPrice };
   };
 
-  const { minPrice, maxPrice, avgPrice } = calculatePriceRange();
+  const { minPrice, maxPrice } = calculatePriceRange();
 
+  // 🎯 Генерация ссылки со всеми выборами пользователя
   const getBotStartUrl = () => {
-    return `https://t.me/${cleanBotName}?start=quiz_${avgPrice}`;
+    const typeIdx = Math.max(0, typesList.indexOf(quizData.type as (typeof typesList)[number]));
+    const currentShapes = shapeOptionsByType[quizData.type] || shapeOptionsByType["Кухня"];
+    const shapeIdx = Math.max(0, currentShapes.findIndex((s) => s.title === quizData.shape));
+    const matIdx = Math.max(0, materialsList.indexOf(quizData.material as (typeof materialsList)[number]));
+    const instIdx = Math.max(0, installmentsList.indexOf(quizData.installment as (typeof installmentsList)[number]));
+
+    // Компактный payload: qz_0_1_1_0_175000_215000
+    const payload = `qz_${typeIdx}_${shapeIdx}_${matIdx}_${instIdx}_${minPrice}_${maxPrice}`;
+    return `https://t.me/${cleanBotName}?start=${payload}`;
   };
 
   const handlePhoneSubmit = async (e?: React.FormEvent) => {
@@ -199,44 +224,44 @@ export const Quiz: React.FC = () => {
                 </h3>
                 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4">
-                  {[
-                    { title: "Кухня", desc: "Прямая, угловая или с островом", tag: "Хит" },
-                    { title: "Кухня + Мебель во всю квартиру", desc: "Шкафы, ТВ-зона, прихожая под ключ", tag: "Выгода до 15%" },
-                    { title: "Шкаф-купе / Гардеробная", desc: "Встроенные системы с PUR-кромлением", tag: "От 14 дней" },
-                    { title: "Шкаф-кровать трансформер", desc: "Усиленный газлифт, ресурс 15 лет", tag: "Новинка" },
-                  ].map((item) => (
-                    <button
-                      key={item.title}
-                      type="button"
-                      onClick={() => {
-                        const nextShapes = shapeOptionsByType[item.title] || [];
-                        setQuizData({ 
-                          ...quizData, 
-                          type: item.title,
-                          shape: nextShapes[0]?.title || "Стандартная"
-                        });
-                        setStep(2);
-                      }}
-                      className={`p-4 sm:p-5 rounded-xl text-left border transition-all flex flex-col justify-between cursor-pointer ${
-                        quizData.type === item.title
-                          ? "bg-industrial-accent/15 border-industrial-accent ring-2 ring-industrial-accent/30"
-                          : "bg-industrial-surface/80 border-industrial-border hover:border-white/20 hover:bg-industrial-surface"
-                      }`}
-                    >
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="font-bold text-base sm:text-lg text-white">{item.title}</span>
-                        <span className="text-[11px] font-mono font-semibold px-2 py-0.5 rounded bg-white/10 text-white/90">
-                          {item.tag}
-                        </span>
-                      </div>
-                      <span className="text-xs sm:text-sm text-industrial-muted">{item.desc}</span>
-                    </button>
-                  ))}
+                  {typesList.map((typeTitle) => {
+                    const tag = typeTitle === "Кухня" ? "Хит" : typeTitle === "Кухня + Мебель во всю квартиру" ? "Выгода 15%" : typeTitle === "Шкаф-купе / Гардеробная" ? "От 14 дней" : "Новинка";
+                    const desc = typeTitle === "Кухня" ? "Прямая, угловая или с островом" : typeTitle === "Кухня + Мебель во всю квартиру" ? "Шкафы, ТВ-зона, прихожая под ключ" : typeTitle === "Шкаф-купе / Гардеробная" ? "Встроенные системы с PUR-кромлением" : "Усиленный газлифт, ресурс 15 лет";
+
+                    return (
+                      <button
+                        key={typeTitle}
+                        type="button"
+                        onClick={() => {
+                          const nextShapes = shapeOptionsByType[typeTitle] || [];
+                          setQuizData({ 
+                            ...quizData, 
+                            type: typeTitle,
+                            shape: nextShapes[0]?.title || "Стандартная"
+                          });
+                          setStep(2);
+                        }}
+                        className={`p-4 sm:p-5 rounded-xl text-left border transition-all flex flex-col justify-between cursor-pointer ${
+                          quizData.type === typeTitle
+                            ? "bg-industrial-accent/15 border-industrial-accent ring-2 ring-industrial-accent/30"
+                            : "bg-industrial-surface/80 border-industrial-border hover:border-white/20 hover:bg-industrial-surface"
+                        }`}
+                      >
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="font-bold text-base sm:text-lg text-white">{typeTitle}</span>
+                          <span className="text-[11px] font-mono font-semibold px-2 py-0.5 rounded bg-white/10 text-white/90">
+                            {tag}
+                          </span>
+                        </div>
+                        <span className="text-xs sm:text-sm text-industrial-muted">{desc}</span>
+                      </button>
+                    );
+                  })}
                 </div>
               </motion.div>
             )}
 
-            {/* ШАГ 2: ДИНАМИЧЕСКАЯ КОНФИГУРАЦИЯ */}
+            {/* ШАГ 2: КОНФИГУРАЦИЯ */}
             {step === 2 && (
               <motion.div
                 key="step2"
@@ -288,41 +313,28 @@ export const Quiz: React.FC = () => {
                 </h3>
 
                 <div className="grid grid-cols-1 gap-3">
-                  {[
-                    {
-                      name: "Практичный стандарт",
-                      details: "ЛДСП Egger (Австрия) + влагостойкая PUR-кромка + фурнитура DTC с доводчиками",
-                    },
-                    {
-                      name: "Комфорт (МДФ / AGT Supramat)",
-                      details: "МДФ Soft-touch AGT / эмаль матовая + фурнитура Boyard/Hettich с плавным ходом",
-                    },
-                    {
-                      name: "Премиум (Шпон / Blum)",
-                      details: "Фасады натуральный шпон / Fenix NTM + оригинальные австрийские петли Blum",
-                    },
-                    {
-                      name: "Пока не знаю — хочу сравнить образцы на замере",
-                      details: "Технолог привезет все 200+ образцов на замер бесплатно",
-                    },
-                  ].map((mat) => (
-                    <button
-                      key={mat.name}
-                      type="button"
-                      onClick={() => {
-                        setQuizData({ ...quizData, material: mat.name });
-                        setStep(4);
-                      }}
-                      className={`p-4 sm:p-5 rounded-xl text-left border transition-all cursor-pointer ${
-                        quizData.material === mat.name
-                          ? "bg-industrial-accent/15 border-industrial-accent"
-                          : "bg-industrial-surface/80 border-industrial-border hover:border-white/20 hover:bg-industrial-surface"
-                      }`}
-                    >
-                      <div className="font-bold text-white text-base sm:text-lg mb-1">{mat.name}</div>
-                      <div className="text-xs sm:text-sm text-industrial-muted">{mat.details}</div>
-                    </button>
-                  ))}
+                  {materialsList.map((matName) => {
+                    const details = matName === "Практичный стандарт" ? "ЛДСП Egger (Австрия) + влагостойкая PUR-кромка + фурнитура DTC с доводчиками" : matName === "Комфорт (МДФ / AGT Supramat)" ? "МДФ Soft-touch AGT / эмаль матовая + фурнитура Boyard/Hettich с плавным ходом" : matName === "Премиум (Шпон / Blum)" ? "Фасады натуральный шпон / Fenix NTM + оригинальные австрийские петли Blum" : "Технолог привезет все 200+ образцов на замер бесплатно";
+
+                    return (
+                      <button
+                        key={matName}
+                        type="button"
+                        onClick={() => {
+                          setQuizData({ ...quizData, material: matName });
+                          setStep(4);
+                        }}
+                        className={`p-4 sm:p-5 rounded-xl text-left border transition-all cursor-pointer ${
+                          quizData.material === matName
+                            ? "bg-industrial-accent/15 border-industrial-accent"
+                            : "bg-industrial-surface/80 border-industrial-border hover:border-white/20 hover:bg-industrial-surface"
+                        }`}
+                      >
+                        <div className="font-bold text-white text-base sm:text-lg mb-1">{matName}</div>
+                        <div className="text-xs sm:text-sm text-industrial-muted">{details}</div>
+                      </button>
+                    );
+                  })}
                 </div>
               </motion.div>
             )}
@@ -342,40 +354,33 @@ export const Quiz: React.FC = () => {
                 </h3>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4">
-                  {[
-                    {
-                      title: "Да, интересен платеж от 7 500 ₽/мес",
-                      desc: "0% первый взнос, одобрение онлайн за 5 мин на замере",
-                    },
-                    {
-                      title: "Нет, оплата наличными / картой",
-                      desc: "Поэтапная оплата: 10% только ПОСЛЕ монтажа",
-                    },
-                  ].map((inst) => (
-                    <button
-                      key={inst.title}
-                      type="button"
-                      onClick={() => {
-                        setQuizData({ ...quizData, installment: inst.title });
-                        setStep(5);
-                      }}
-                      className={`p-5 rounded-xl text-left border transition-all cursor-pointer ${
-                        quizData.installment === inst.title
-                          ? "bg-industrial-accent/15 border-industrial-accent"
-                          : "bg-industrial-surface/80 border-industrial-border hover:border-white/20 hover:bg-industrial-surface"
-                      }`}
-                    >
-                      <div className="font-bold text-white text-base sm:text-lg mb-1">{inst.title}</div>
-                      <div className="text-xs sm:text-sm text-industrial-muted">{inst.desc}</div>
-                    </button>
-                  ))}
+                  {installmentsList.map((instTitle) => {
+                    const desc = instTitle.startsWith("Да") ? "0% первый взнос, одобрение онлайн за 5 мин на замере" : "Поэтапная оплата: 10% только ПОСЛЕ монтажа";
+
+                    return (
+                      <button
+                        key={instTitle}
+                        type="button"
+                        onClick={() => {
+                          setQuizData({ ...quizData, installment: instTitle });
+                          setStep(5);
+                        }}
+                        className={`p-5 rounded-xl text-left border transition-all cursor-pointer ${
+                          quizData.installment === instTitle
+                            ? "bg-industrial-accent/15 border-industrial-accent"
+                            : "bg-industrial-surface/80 border-industrial-border hover:border-white/20 hover:bg-industrial-surface"
+                        }`}
+                      >
+                        <div className="font-bold text-white text-base sm:text-lg mb-1">{instTitle}</div>
+                        <div className="text-xs sm:text-sm text-industrial-muted">{desc}</div>
+                      </button>
+                    );
+                  })}
                 </div>
               </motion.div>
             )}
 
-            {/* ══════════════════════════════════════════════════════════════
-                ШАГ 5: ИТОГОВАЯ ВИЛКА ЦЕН (ЛАКОНИЧНЫЙ И ЧИСТЫЙ ВИД)
-                ══════════════════════════════════════════════════════════════ */}
+            {/* ШАГ 5: ИТОГОВАЯ ВИЛКА ЦЕН */}
             {step === 5 && (
               <motion.div
                 key="step5"
@@ -383,10 +388,8 @@ export const Quiz: React.FC = () => {
                 animate={{ opacity: 1, y: 0 }}
                 className="space-y-6 sm:space-y-7"
               >
-                {/* Карточка вилки цен */}
                 <div className="rounded-2xl border-2 border-industrial-accent/40 bg-gradient-to-b from-industrial-accent/15 via-industrial-surface to-industrial-surface p-6 sm:p-8 relative overflow-hidden shadow-2xl">
                   
-                  {/* Верхняя строка статусов */}
                   <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
                     <span className="text-xs sm:text-sm font-mono uppercase tracking-wider text-industrial-accent font-bold px-3 py-1.5 rounded-lg bg-industrial-accent/15 border border-industrial-accent/30">
                       ● Индивидуальный расчет
@@ -400,14 +403,12 @@ export const Quiz: React.FC = () => {
                     Ориентировочная стоимость по вашим параметрам:
                   </h4>
 
-                  {/* Главная цифра вилки */}
                   <div className="my-3 sm:my-4">
                     <span className="font-mono text-3xl sm:text-5xl lg:text-6xl font-black text-white tracking-tight">
                       {minPrice.toLocaleString("ru-RU")} — {maxPrice.toLocaleString("ru-RU")} ₽
                     </span>
                   </div>
 
-                  {/* Выбранные параметры в виде аккуратного бейджа */}
                   <div className="p-3.5 sm:p-4 rounded-xl bg-industrial-bg/70 border border-white/10 flex flex-wrap items-center gap-2 sm:gap-4 text-xs sm:text-sm text-slate-200">
                     <div className="flex items-center gap-1.5 font-medium">
                       <span className="text-industrial-muted">Конфигурация:</span>
@@ -421,19 +422,17 @@ export const Quiz: React.FC = () => {
                   </div>
 
                   <p className="mt-3 text-xs sm:text-sm text-slate-400 leading-relaxed">
-                    * Фиксируем твердую смету в договоре после бесплатного 3D-проекта и замера.
+                    * Фиксируем твердую смету в договоре после бесплатного 3D-проекта и лазерного замера.
                   </p>
 
                 </div>
 
-                {/* Форма захвата и кнопка Telegram */}
                 {!isSubmitted ? (
                   <div className="space-y-4 pt-1">
                     <p className="text-sm sm:text-base font-bold text-white">
                       Куда отправить подробную PDF-спецификацию и зафиксировать подарок?
                     </p>
 
-                    {/* Кнопка в Telegram */}
                     <a
                       href={getBotStartUrl()}
                       target="_blank"
@@ -450,7 +449,6 @@ export const Quiz: React.FC = () => {
                       <div className="flex-1 h-px bg-industrial-border" />
                     </div>
 
-                    {/* Форма ввода телефона */}
                     <form onSubmit={handlePhoneSubmit} className="flex flex-col sm:flex-row gap-3">
                       <input
                         type="tel"
@@ -520,7 +518,7 @@ export const Quiz: React.FC = () => {
 
           </AnimatePresence>
 
-          {/* Нижняя плашка навигации и промежуточной вилки */}
+          {/* Нижняя плашка навигации */}
           {step > 1 && step < 5 && (
             <div className="mt-8 pt-5 border-t border-industrial-border flex items-center justify-between">
               <button
