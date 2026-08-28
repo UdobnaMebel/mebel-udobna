@@ -42,47 +42,36 @@ const SmartCaseImage: React.FC<{ project: ProjectCase }> = ({ project }) => {
       alt={project.title}
       loading="lazy"
       decoding="async"
-      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out will-change-transform"
+      className="w-full h-full object-cover transition-transform duration-500 ease-out will-change-transform"
     />
   );
 };
 
-// 100% аппаратные GPU-анимации без тяжелых шейдеров
 const containerVariants: Variants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
     transition: {
-      staggerChildren: 0.05, // Динамичный и легкий шаг каскада
-      delayChildren: 0.02,
+      staggerChildren: 0.04,
+      delayChildren: 0.01,
     },
   },
   exit: {
     opacity: 0,
-    transition: { duration: 0.12, ease: "easeOut" },
+    transition: { duration: 0.1 },
   },
 };
 
 const cardVariants: Variants = {
-  hidden: {
-    opacity: 0,
-    scale: 0.96,
-  },
+  hidden: { opacity: 0, scale: 0.98 },
   visible: {
     opacity: 1,
     scale: 1,
-    transition: {
-      duration: 0.38,
-      ease: [0.16, 1, 0.3, 1], // Шелковистая кривая Apple
-    },
+    transition: { duration: 0.25, ease: "easeOut" },
   },
   exit: {
     opacity: 0,
-    scale: 0.98,
-    transition: {
-      duration: 0.12,
-      ease: "easeOut",
-    },
+    transition: { duration: 0.1 },
   },
 };
 
@@ -131,11 +120,8 @@ export const Portfolio: React.FC = () => {
   return (
     <section 
       id="cases-section" 
-      style={{ overflowAnchor: "none" }}
       className="py-14 sm:py-24 bg-industrial-bg border-t border-industrial-border relative overflow-hidden"
     >
-      <div className="absolute top-1/3 left-0 w-[500px] h-[500px] bg-industrial-accent/5 rounded-full blur-3xl pointer-events-none" />
-
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         
         {/* Заголовок */}
@@ -163,16 +149,15 @@ export const Portfolio: React.FC = () => {
                   key={cat}
                   type="button"
                   onClick={() => setActiveTab(cat)}
-                  className={`relative px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-semibold tracking-wide whitespace-nowrap transition-colors duration-200 cursor-pointer flex items-center gap-2 shrink-0 z-10 ${
+                  className={`relative px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-semibold tracking-wide whitespace-nowrap transition-colors duration-150 cursor-pointer flex items-center gap-2 shrink-0 z-10 ${
                     isActive ? "text-white font-bold" : "text-white/80 hover:text-white"
                   }`}
                 >
-                  {/* Скользящий индикатор таба */}
                   {isActive && (
                     <motion.div
                       layoutId="activeCategoryPill"
                       className="absolute inset-0 bg-industrial-accent rounded-xl shadow-industrial -z-10"
-                      transition={{ type: "spring", stiffness: 380, damping: 32 }}
+                      transition={{ type: "spring", stiffness: 400, damping: 35 }}
                     />
                   )}
 
@@ -192,7 +177,7 @@ export const Portfolio: React.FC = () => {
           </div>
         </div>
 
-        {/* Сетка проектов с аппаратным каскадом 60 FPS */}
+        {/* Сетка проектов */}
         <AnimatePresence mode="wait">
           <motion.div
             key={activeTab}
@@ -212,7 +197,7 @@ export const Portfolio: React.FC = () => {
                 <motion.div
                   key={project.id}
                   variants={cardVariants}
-                  className={`glass-panel rounded-2xl overflow-hidden border border-white/10 flex flex-col justify-between group hover:border-white/25 transition-colors gpu-layer ${
+                  className={`glass-panel rounded-2xl overflow-hidden border border-white/10 flex flex-col justify-between group hover:border-white/25 transition-colors content-auto ${
                     isHiddenOnMobile ? "hidden md:flex" : "flex"
                   }`}
                 >
@@ -298,7 +283,7 @@ export const Portfolio: React.FC = () => {
 
       </div>
 
-      {/* ПОЛНОЭКРАННЫЙ МОДАЛЬНЫЙ КАТАЛОГ */}
+      {/* Модальное окно */}
       <AnimatePresence>
         {isModalOpen && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-6 lg:p-10">
@@ -306,16 +291,16 @@ export const Portfolio: React.FC = () => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 0.25, ease: "easeInOut" }}
+              transition={{ duration: 0.2 }}
               onClick={() => setIsModalOpen(false)}
-              className="absolute inset-0 bg-black/85 backdrop-blur-md"
+              className="absolute inset-0 bg-black/85 backdrop-blur-sm"
             />
 
             <motion.div
               initial={{ opacity: 0, scale: 0.97 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.97 }}
-              transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
+              transition={{ duration: 0.2 }}
               className="relative w-full max-w-7xl max-h-[92vh] bg-industrial-bg border border-industrial-border rounded-2xl shadow-2xl flex flex-col z-10 overflow-hidden"
             >
               {/* Шапка модалки */}
@@ -368,7 +353,7 @@ export const Portfolio: React.FC = () => {
                   {modalProjects.map((project) => (
                     <div
                       key={`modal-project-${project.id}`}
-                      className="glass-panel rounded-2xl overflow-hidden border border-white/10 flex flex-col justify-between group hover:border-white/25 transition-colors shadow-lg gpu-layer"
+                      className="glass-panel rounded-2xl overflow-hidden border border-white/10 flex flex-col justify-between group hover:border-white/25 transition-colors shadow-lg content-auto"
                     >
                       <div>
                         <div className="relative aspect-[16/10] overflow-hidden bg-industrial-surface">

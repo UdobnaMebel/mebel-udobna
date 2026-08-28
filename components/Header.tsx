@@ -3,21 +3,24 @@
 
 import React, { useState, useEffect } from "react";
 import { MessageSquare, Send, ShieldCheck, MapPin, Calculator } from "lucide-react";
+import { companyConfig } from "../data/company";
 
 export const Header: React.FC = () => {
   const [scrolled, setScrolled] = useState(false);
   const [logoError, setLogoError] = useState(false);
 
-  const phone = process.env.NEXT_PUBLIC_PHONE || "+7 (988) 515-55-15";
-  const phoneClean = phone.replace(/[^0-9+]/g, "");
-  const tgUrl = process.env.NEXT_PUBLIC_TG_MANAGER || "https://t.me/your_manager_username";
-  const waUrl = process.env.NEXT_PUBLIC_WA_MANAGER || "https://wa.me/79885155515";
-
   useEffect(() => {
+    let ticking = false;
     const handleScroll = () => {
-      setScrolled(window.scrollY > 20);
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          setScrolled(window.scrollY > 20);
+          ticking = false;
+        });
+        ticking = true;
+      }
     };
-    window.addEventListener("scroll", handleScroll);
+    window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
@@ -27,7 +30,7 @@ export const Header: React.FC = () => {
 
   return (
     <header
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-200 ${
         scrolled
           ? "py-2.5 glass-panel border-b border-white/10 shadow-2xl"
           : "py-3 sm:py-4 bg-transparent"
@@ -87,19 +90,19 @@ export const Header: React.FC = () => {
           
           <div className="flex items-center gap-1.5 shrink-0">
             <a
-              href={tgUrl}
+              href={companyConfig.tgManagerUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-industrial-surface hover:bg-industrial-border flex items-center justify-center text-sky-400 hover:scale-105 transition-transform duration-200 border border-white/10 shrink-0 gpu-layer"
+              className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-industrial-surface hover:bg-industrial-border flex items-center justify-center text-sky-400 transition-colors border border-white/10 shrink-0"
               title="Написать технологу в Telegram"
             >
               <Send className="w-4 h-4" />
             </a>
             <a
-              href={waUrl}
+              href={companyConfig.waManagerUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-industrial-surface hover:bg-industrial-border flex items-center justify-center text-emerald-400 hover:scale-105 transition-transform duration-200 border border-white/10 shrink-0 gpu-layer"
+              className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-industrial-surface hover:bg-industrial-border flex items-center justify-center text-emerald-400 transition-colors border border-white/10 shrink-0"
               title="Написать в WhatsApp"
             >
               <MessageSquare className="w-4 h-4" />
@@ -107,18 +110,18 @@ export const Header: React.FC = () => {
           </div>
 
           <a
-            href={`tel:${phoneClean}`}
+            href={`tel:${companyConfig.phoneClean}`}
             className="hidden md:flex flex-col text-right pl-1 shrink-0"
           >
             <span className="text-[10px] text-industrial-muted font-mono whitespace-nowrap">Технолог цеха:</span>
             <span className="font-mono text-sm sm:text-base font-bold text-white hover:text-industrial-accent transition-colors whitespace-nowrap">
-              {phone}
+              {companyConfig.phone}
             </span>
           </a>
 
           <button
             onClick={() => scrollToSection("quiz-section")}
-            className="inline-flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm font-bold uppercase tracking-wider bg-industrial-accent text-white hover:bg-industrial-accentHover transition-all shadow-industrial active:scale-95 cursor-pointer whitespace-nowrap shrink-0 gpu-layer"
+            className="inline-flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm font-bold uppercase tracking-wider bg-industrial-accent text-white hover:bg-industrial-accentHover transition-colors shadow-industrial active:scale-95 cursor-pointer whitespace-nowrap shrink-0"
           >
             <Calculator className="w-4 h-4 shrink-0 lg:hidden" />
             <span className="hidden lg:inline">Рассчитать смету</span>

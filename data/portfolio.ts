@@ -38,7 +38,7 @@ export const portfolioProjects: ProjectCase[] = [
     category: "ЖК Вересаево",
     complex: "ЖК «Вересаево»",
     address: "ул. Берберовская, 24",
-    image: "https://images.unsplash.com/photo-1556911220-e15b29be8c8f?q=80&w=1000&auto=format&fit=crop",
+    image: "/images/cases/01.webp",
     fallbackImage: "https://images.unsplash.com/photo-1556911220-e15b29be8c8f?q=80&w=1000&auto=format&fit=crop",
     specs: [
       { label: "Размеры", value: "3.4 × 1.8 м (высота 2.65 м)" },
@@ -56,7 +56,7 @@ export const portfolioProjects: ProjectCase[] = [
     category: "ЖК Левобережье",
     complex: "ЖК «Левобережье»",
     address: "ул. Левобережная, 3",
-    image: "https://images.unsplash.com/photo-1595428774223-ef52624120d2?q=80&w=1000&auto=format&fit=crop",
+    image: "/images/cases/06.webp",
     fallbackImage: "https://images.unsplash.com/photo-1595428774223-ef52624120d2?q=80&w=1000&auto=format&fit=crop",
     specs: [
       { label: "Габариты", value: "2.7 × 2.6 × 0.6 м" },
@@ -74,7 +74,7 @@ export const portfolioProjects: ProjectCase[] = [
     category: "ЖК Левенцовский",
     complex: "ЖК «Левенцовский»",
     address: "просп. Маршала Жукова, 21",
-    image: "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?q=80&w=1000&auto=format&fit=crop",
+    image: "/images/cases/07.webp",
     fallbackImage: "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?q=80&w=1000&auto=format&fit=crop",
     specs: [
       { label: "Спальное место", value: "160 × 200 см с ортопедическим основанием" },
@@ -92,7 +92,7 @@ export const portfolioProjects: ProjectCase[] = [
     category: "ЖК Суворовский",
     complex: "ЖК «Суворовский»",
     address: "ул. Андреева, 14",
-    image: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=1000&auto=format&fit=crop",
+    image: "/images/cases/02.webp",
     fallbackImage: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=1000&auto=format&fit=crop",
     specs: [
       { label: "Состав комплекта", value: "Кухня 3.2м + 2 шкафа + ТВ-зона + Прихожая" },
@@ -110,7 +110,7 @@ export const portfolioProjects: ProjectCase[] = [
     category: "Батайск / Аксай",
     complex: "г. Батайск",
     address: "ул. Почтовая, 42",
-    image: "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?q=80&w=1000&auto=format&fit=crop",
+    image: "/images/cases/05.webp",
     fallbackImage: "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?q=80&w=1000&auto=format&fit=crop",
     specs: [
       { label: "Размеры", value: "4.2 × 2.6 м + Остров 1.8 × 0.9 м" },
@@ -128,7 +128,7 @@ export const portfolioProjects: ProjectCase[] = [
     category: "ЖК Вересаево",
     complex: "ЖК «Вересаево»",
     address: "ул. Берберовская, 18",
-    image: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?q=80&w=1000&auto=format&fit=crop",
+    image: "/images/cases/04.webp",
     fallbackImage: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?q=80&w=1000&auto=format&fit=crop",
     specs: [
       { label: "Размеры", value: "2.4 × 2.9 × 1.8 м (с зоной у окна)" },
@@ -146,7 +146,7 @@ export const portfolioProjects: ProjectCase[] = [
     category: "ЖК Левобережье",
     complex: "ЖК «Левобережье»",
     address: "ул. Левобережная, 7",
-    image: "https://images.unsplash.com/photo-1558997519-83ea9252def8?q=80&w=1000&auto=format&fit=crop",
+    image: "/images/cases/07.webp",
     fallbackImage: "https://images.unsplash.com/photo-1558997519-83ea9252def8?q=80&w=1000&auto=format&fit=crop",
     specs: [
       { label: "Площадь", value: "5.4 кв.м (П-образная планировка)" },
@@ -164,7 +164,7 @@ export const portfolioProjects: ProjectCase[] = [
     category: "ЖК Левенцовский",
     complex: "ЖК «Левенцовский»",
     address: "ул. Еременко, 110",
-    image: "https://images.unsplash.com/photo-1507089947368-19c1da9775ae?q=80&w=1000&auto=format&fit=crop",
+    image: "/images/cases/03.webp",
     fallbackImage: "https://images.unsplash.com/photo-1507089947368-19c1da9775ae?q=80&w=1000&auto=format&fit=crop",
     specs: [
       { label: "Длина", value: "2.4 м с пеналом под холодильник" },

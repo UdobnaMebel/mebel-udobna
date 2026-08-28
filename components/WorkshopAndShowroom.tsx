@@ -127,7 +127,7 @@ export const WorkshopAndShowroom: React.FC = () => {
                   Кто за это платит?
                 </h4>
                 <p className="text-xs sm:text-sm text-industrial-muted leading-relaxed">
-                  Покупатель — переплачивая от <strong className="text-white font-semibold">30% до 40%</strong> за каждый погонный метр. Мы инвестировали эти средства в <strong className="text-emerald-400">немецкие станки с ЧПУ</strong> и технологию PUR-кромления, а образцы привозим прямо к вам на объект.
+                  Покупатель — переплачивая от <strong className="text-white font-semibold">30% до 40%</strong> за каждый погонный метр. Мы инвестировали эти средства в <strong className="text-emerald-400">улучшение качества продукции</strong> и технологии производства, а образцы привозим прямо к вам на объект.
                 </p>
               </div>
 
@@ -154,7 +154,7 @@ export const WorkshopAndShowroom: React.FC = () => {
                 className="inline-flex items-center justify-center gap-2.5 px-6 sm:px-8 py-4 rounded-xl bg-industrial-surface border-2 border-industrial-accent/40 hover:border-industrial-accent text-white font-bold text-xs sm:text-sm uppercase tracking-wider hover:bg-industrial-accent/10 transition-all shadow-xl active:scale-95 cursor-pointer w-full sm:w-auto"
               >
                 <Ticket className="w-4 h-4 text-industrial-accent" />
-                <span>Запросить гостевой пропуск в цех</span>
+                <span>Запланировать визит в цех</span>
               </button>
             </div>
 
@@ -252,8 +252,8 @@ export const WorkshopAndShowroom: React.FC = () => {
               },
               {
                 step: "03",
-                title: "3D-проект и смета за 40 мин",
-                desc: "Инженер составляет точную планировку на ноутбуке и рассчитывает смету в 3 комплектациях.",
+                title: "3D-проект и смета",
+                desc: "Инженер составляет точную планировку и рассчитывает смету.",
                 icon: Sparkles,
               },
               {
@@ -459,13 +459,13 @@ export const WorkshopAndShowroom: React.FC = () => {
                 Экскурсия на мебельную фабрику «Удобна»
               </h3>
               <p className="text-xs sm:text-sm text-industrial-muted mb-5 leading-relaxed">
-                Покажем работу ЧПУ-станков, образцы австрийского ЛДСП Egger и полиуретановый шов PUR под микроскопом.
+                Покажем образцы ЛДСП, фурнитуры и столешниц. Составим подробную смету.
               </p>
 
               <div className="bg-industrial-surface p-4 rounded-xl border border-industrial-border text-xs text-white/90 space-y-2 mb-6">
                 <div className="flex items-center gap-2">
                   <Building2 className="w-4 h-4 text-industrial-accent shrink-0" />
-                  <span>Адрес: г. Ростов-на-Дону (визиты по записи)</span>
+                  <span>Адрес: г. Ростов-на-Дону, пер. Машиностроительный 7/1 (по договоренности)</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Clock className="w-4 h-4 text-emerald-400 shrink-0" />
@@ -480,7 +480,7 @@ export const WorkshopAndShowroom: React.FC = () => {
                 className="w-full py-4 px-6 rounded-xl bg-industrial-accent hover:bg-industrial-accentHover text-white font-bold text-sm uppercase tracking-wider flex items-center justify-center gap-2 shadow-industrial transition-colors"
               >
                 <Send className="w-4 h-4" />
-                <span>Получить пропуск в Telegram</span>
+                <span>Назначит встречу в Telegram</span>
               </a>
             </motion.div>
           </div>
