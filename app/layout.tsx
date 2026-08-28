@@ -32,6 +32,18 @@ export const metadata: Metadata = {
     siteName: "Фабрика мебели «Удобна»",
     locale: "ru_RU",
     type: "website",
+    images: [
+      {
+        url: "/og-image.jpg", // лежит в public/og-image.jpg
+        width: 1200,
+        height: 630,
+        alt: "Фабрика мебели «Удобна» Ростов-на-Дону",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    images: ["/og-image.jpg"],
   },
 };
 
